@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(to bottom, #f8fafc, #ffffff);
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .function-selector {
+            margin-bottom: 2rem;
+        }
+
+        .function-selector label {
+            display: block;
+            font-size: 0.875rem;
+            color: #475569;
+            margin-bottom: 0.25rem;
+        }
+
+        .function-selector select {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 1rem;
+            min-width: 320px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .plot-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+
+        .controls-container {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .controls-container h2 {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.875rem;
+            color: #475569;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #0f172a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e293b;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #0f172a;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        .info-card p, .info-card ul {
+            font-size: 0.875rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .info-card ul {
+            padding-left: 1.25rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            padding: 2rem 0;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .function-selector select {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Function Explorer</h1>
+            <p class="subtitle">Pick a function, tweak parameters, and see how its properties show up on the graph. Start with linear; others coming next.</p>
+        </header>
+
+        <div class="function-selector">
+            <label for="function">Function</label>
+            <select id="function">
+                <option value="linear">Linear (y = m x + b)</option>
+                <option value="parabola" disabled>Parabola (coming soon)</option>
+                <option value="exponential" disabled>Exponential (coming soon)</option>
+                <option value="log" disabled>Log (coming soon)</option>
+                <option value="sigmoid" disabled>Sigmoid (coming soon)</option>
+                <option value="relu" disabled>ReLU (coming soon)</option>
+                <option value="tanh" disabled>tanh (coming soon)</option>
+                <option value="leakyrelu" disabled>Leaky ReLU (coming soon)</option>
+                <option value="softplus" disabled>Softplus (coming soon)</option>
+                <option value="gelu" disabled>GELU (coming soon)</option>
+            </select>
+        </div>
+
+        <div class="plot-container">
+            <svg id="plot" viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+
+        <div class="controls-container">
+            <h2>Controls</h2>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>Slope m: <span id="m-value">1.00</span></label>
+                    <input type="range" id="m-slider" min="-3" max="3" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>Intercept b: <span id="b-value">0.00</span></label>
+                    <input type="range" id="b-slider" min="-3" max="3" step="0.1" value="0">
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-triangle" checked>
+                    <label for="show-triangle">Show slope triangle</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-intercepts" checked>
+                    <label for="show-intercepts">Show intercepts</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="show-lipschitz">
+                    <label for="show-lipschitz">Lipschitz demo (drag points)</label>
+                </div>
+            </div>
+            <div class="preset-buttons">
+                <button class="btn btn-primary" data-m="2" data-b="0">Preset: m=2, b=0</button>
+                <button class="btn btn-primary" data-m="-1" data-b="1.5">Preset: m=-1, b=1.5</button>
+                <button class="btn btn-primary" data-m="0" data-b="1">Preset: m=0, b=1</button>
+                <button class="btn btn-secondary" id="reset-btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="info-cards">
+            <div class="info-card">
+                <h3>Key properties</h3>
+                <ul>
+                    <li>Monotonic if m ≠ 0; constant if m = 0</li>
+                    <li>Continuous, unbounded</li>
+                    <li>Derivative y' = m (constant)</li>
+                    <li>Second derivative = 0 → convex and concave</li>
+                    <li>Lipschitz constant = |m|</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>Intercepts</h3>
+                <p>y-intercept at (0, b). If m ≠ 0, x-intercept at (−b/m, 0).</p>
+            </div>
+            <div class="info-card">
+                <h3>How to read the slope</h3>
+                <p>Triangle shows <em>rise</em> over <em>run</em>. Positive m tilts up to the right; negative m tilts down.</p>
+            </div>
+        </div>
+
+        <footer>
+            v1 • Linear only. Next up: Parabola, Exponential, Log, Sigmoid, ReLU, tanh, Leaky ReLU, Softplus, GELU.
+        </footer>
+    </div>
+
+    <script>
+        // State
+        let m = 1;
+        let b = 0;
+        let showTriangle = true;
+        let showIntercepts = true;
+        let showLipschitz = false;
+        let lipschitzPoints = { A: { x: -1, y: -1 }, B: { x: 2, y: 2 } };
+        let dragging = null;
+
+        // Constants
+        const width = 720;
+        const height = 440;
+        const margin = { top: 24, right: 24, bottom: 28, left: 40 };
+        const innerW = width - margin.left - margin.right;
+        const innerH = height - margin.top - margin.bottom;
+        const xDomain = [-5, 5];
+        const yDomain = [-5, 5];
+
+        // Scales
+        const xScale = (x) => margin.left + ((x - xDomain[0]) / (xDomain[1] - xDomain[0])) * innerW;
+        const yScale = (y) => margin.top + innerH - ((y - yDomain[0]) / (yDomain[1] - yDomain[0])) * innerH;
+        const xUnscale = (px) => xDomain[0] + ((px - margin.left) / innerW) * (xDomain[1] - xDomain[0]);
+        const yUnscale = (py) => yDomain[0] + ((margin.top + innerH - py) / innerH) * (yDomain[1] - yDomain[0]);
+
+        // Get elements
+        const svg = document.getElementById('plot');
+        const mSlider = document.getElementById('m-slider');
+        const bSlider = document.getElementById('b-slider');
+        const mValue = document.getElementById('m-value');
+        const bValue = document.getElementById('b-value');
+        const triangleCheck = document.getElementById('show-triangle');
+        const interceptsCheck = document.getElementById('show-intercepts');
+        const lipschitzCheck = document.getElementById('show-lipschitz');
+
+        function render() {
+            // Clear SVG
+            svg.innerHTML = '';
+
+            // Grid and axes
+            const grid = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            
+            // Grid lines
+            for (let x = Math.ceil(xDomain[0]); x <= Math.floor(xDomain[1]); x++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', xScale(x));
+                line.setAttribute('y1', margin.top);
+                line.setAttribute('x2', xScale(x));
+                line.setAttribute('y2', height - margin.bottom);
+                line.setAttribute('stroke', '#e5e7eb');
+                line.setAttribute('stroke-dasharray', '3 3');
+                grid.appendChild(line);
+            }
+            
+            for (let y = Math.ceil(yDomain[0]); y <= Math.floor(yDomain[1]); y++) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', margin.left);
+                line.setAttribute('y1', yScale(y));
+                line.setAttribute('x2', width - margin.right);
+                line.setAttribute('y2', yScale(y));
+                line.setAttribute('stroke', '#e5e7eb');
+                line.setAttribute('stroke-dasharray', '3 3');
+                grid.appendChild(line);
+            }
+
+            // Axes
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', margin.left);
+            xAxis.setAttribute('y1', yScale(0));
+            xAxis.setAttribute('x2', width - margin.right);
+            xAxis.setAttribute('y2', yScale(0));
+            xAxis.setAttribute('stroke', '#374151');
+            grid.appendChild(xAxis);
+
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', xScale(0));
+            yAxis.setAttribute('y1', margin.top);
+            yAxis.setAttribute('x2', xScale(0));
+            yAxis.setAttribute('y2', height - margin.bottom);
+            yAxis.setAttribute('stroke', '#374151');
+            grid.appendChild(yAxis);
+
+            // Tick labels
+            for (let x = Math.ceil(xDomain[0]); x <= Math.floor(xDomain[1]); x++) {
+                if (x === 0) continue;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', xScale(x));
+                text.setAttribute('y', yScale(0) + 18);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#374151');
+                text.setAttribute('font-size', '10');
+                text.textContent = x;
+                grid.appendChild(text);
+            }
+
+            for (let y = Math.ceil(yDomain[0]); y <= Math.floor(yDomain[1]); y++) {
+                if (y === 0) continue;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', xScale(0) - 10);
+                text.setAttribute('y', yScale(y) + 3);
+                text.setAttribute('text-anchor', 'end');
+                text.setAttribute('fill', '#374151');
+                text.setAttribute('font-size', '10');
+                text.textContent = y;
+                grid.appendChild(text);
+            }
+
+            svg.appendChild(grid);
+
+            // Linear function line
+            const y1 = m * xDomain[0] + b;
+            const y2 = m * xDomain[1] + b;
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', xScale(xDomain[0]));
+            line.setAttribute('y1', yScale(Math.max(yDomain[0], Math.min(yDomain[1], y1))));
+            line.setAttribute('x2', xScale(xDomain[1]));
+            line.setAttribute('y2', yScale(Math.max(yDomain[0], Math.min(yDomain[1], y2))));
+            line.setAttribute('stroke', '#4f46e5');
+            line.setAttribute('stroke-width', '3');
+            svg.appendChild(line);
+
+            // Equation label
+            const eqLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            eqLabel.setAttribute('x', width - margin.right);
+            eqLabel.setAttribute('y', margin.top + 20);
+            eqLabel.setAttribute('text-anchor', 'end');
+            eqLabel.setAttribute('fill', '#1f2937');
+            eqLabel.setAttribute('font-size', '14');
+            eqLabel.textContent = `y = ${m.toFixed(2)}x + ${b.toFixed(2)}`;
+            svg.appendChild(eqLabel);
+
+            // Intercepts
+            if (showIntercepts) {
+                // y-intercept
+                const yInt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                yInt.setAttribute('cx', xScale(0));
+                yInt.setAttribute('cy', yScale(b));
+                yInt.setAttribute('r', '5');
+                yInt.setAttribute('fill', '#10b981');
+                svg.appendChild(yInt);
+
+                // x-intercept (if m != 0)
+                if (Math.abs(m) > 0.001) {
+                    const xIntValue = -b / m;
+                    if (xIntValue >= xDomain[0] && xIntValue <= xDomain[1]) {
+                        const xInt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        xInt.setAttribute('cx', xScale(xIntValue));
+                        xInt.setAttribute('cy', yScale(0));
+                        xInt.setAttribute('r', '5');
+                        xInt.setAttribute('fill', '#ef4444');
+                        svg.appendChild(xInt);
+                    }
+                }
+            }
+
+            // Slope triangle
+            if (showTriangle) {
+                const x0 = m >= 0 ? -2 : 0.6;
+                const x1 = x0 + 1;
+                const y0 = m * x0 + b;
+                const y1 = m * x1 + b;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M${xScale(x0)},${yScale(y0)} L${xScale(x0)},${yScale(y1)} L${xScale(x1)},${yScale(y1)}`);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', '#f59e0b');
+                path.setAttribute('stroke-width', '2');
+                svg.appendChild(path);
+
+                const runLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                runLabel.setAttribute('x', xScale((x0 + x1) / 2));
+                runLabel.setAttribute('y', yScale(y0) - 6);
+                runLabel.setAttribute('text-anchor', 'middle');
+                runLabel.setAttribute('fill', '#d97706');
+                runLabel.setAttribute('font-size', '10');
+                runLabel.textContent = 'run = 1';
+                svg.appendChild(runLabel);
+
+                const riseLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                riseLabel.setAttribute('x', m >= 0 ? xScale(x1) + 6 : xScale(x0) - 6);
+                riseLabel.setAttribute('y', yScale((y0 + y1) / 2));
+                riseLabel.setAttribute('text-anchor', m >= 0 ? 'start' : 'end');
+                riseLabel.setAttribute('fill', '#d97706');
+                riseLabel.setAttribute('font-size', '10');
+                riseLabel.textContent = `rise = ${m.toFixed(2)}`;
+                svg.appendChild(riseLabel);
+            }
+
+            // Lipschitz demo
+            if (showLipschitz) {
+                // Update points to be on the line
+                lipschitzPoints.A.y = m * lipschitzPoints.A.x + b;
+                lipschitzPoints.B.y = m * lipschitzPoints.B.x + b;
+
+                // Line between points
+                const lipLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                lipLine.setAttribute('x1', xScale(lipschitzPoints.A.x));
+                lipLine.setAttribute('y1', yScale(lipschitzPoints.A.y));
+                lipLine.setAttribute('x2', xScale(lipschitzPoints.B.x));
+                lipLine.setAttribute('y2', yScale(lipschitzPoints.B.y));
+                lipLine.setAttribute('stroke', '#0284c7');
+                lipLine.setAttribute('stroke-dasharray', '4 2');
+                svg.appendChild(lipLine);
+
+                // Draggable points
+                ['A', 'B'].forEach(point => {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', xScale(lipschitzPoints[point].x));
+                    circle.setAttribute('cy', yScale(lipschitzPoints[point].y));
+                    circle.setAttribute('r', '6');
+                    circle.setAttribute('fill', '#0369a1');
+                    circle.setAttribute('cursor', 'grab');
+                    circle.setAttribute('data-point', point);
+                    svg.appendChild(circle);
+
+                    circle.addEventListener('mousedown', (e) => {
+                        dragging = point;
+                        e.preventDefault();
+                    });
+                });
+
+                // Lipschitz constant label
+                const deltaX = Math.abs(lipschitzPoints.A.x - lipschitzPoints.B.x);
+                const deltaY = Math.abs(lipschitzPoints.A.y - lipschitzPoints.B.y);
+                const lipConst = deltaX > 0.001 ? (deltaY / deltaX).toFixed(3) : '—';
+                
+                const lipLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                lipLabel.setAttribute('x', xScale((lipschitzPoints.A.x + lipschitzPoints.B.x) / 2));
+                lipLabel.setAttribute('y', yScale((lipschitzPoints.A.y + lipschitzPoints.B.y) / 2) - 8);
+                lipLabel.setAttribute('text-anchor', 'middle');
+                lipLabel.setAttribute('fill', '#075985');
+                lipLabel.setAttribute('font-size', '11');
+                lipLabel.textContent = `|Δy|/|Δx| ≈ ${lipConst}`;
+                svg.appendChild(lipLabel);
+            }
+        }
+
+        // Event listeners
+        mSlider.addEventListener('input', (e) => {
+            m = parseFloat(e.target.value);
+            mValue.textContent = m.toFixed(2);
+            render();
+        });
+
+        bSlider.addEventListener('input', (e) => {
+            b = parseFloat(e.target.value);
+            bValue.textContent = b.toFixed(2);
+            render();
+        });
+
+        triangleCheck.addEventListener('change', (e) => {
+            showTriangle = e.target.checked;
+            render();
+        });
+
+        interceptsCheck.addEventListener('change', (e) => {
+            showIntercepts = e.target.checked;
+            render();
+        });
+
+        lipschitzCheck.addEventListener('change', (e) => {
+            showLipschitz = e.target.checked;
+            render();
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                m = parseFloat(e.target.dataset.m);
+                b = parseFloat(e.target.dataset.b);
+                mSlider.value = m;
+                bSlider.value = b;
+                mValue.textContent = m.toFixed(2);
+                bValue.textContent = b.toFixed(2);
+                render();
+            });
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            m = 1;
+            b = 0;
+            showTriangle = true;
+            showIntercepts = true;
+            showLipschitz = false;
+            mSlider.value = m;
+            bSlider.value = b;
+            mValue.textContent = m.toFixed(2);
+            bValue.textContent = b.toFixed(2);
+            triangleCheck.checked = showTriangle;
+            interceptsCheck.checked = showIntercepts;
+            lipschitzCheck.checked = showLipschitz;
+            render();
+        });
+
+        // Mouse events for dragging
+        svg.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            const rect = svg.getBoundingClientRect();
+            const x = xUnscale(e.clientX - rect.left);
+            const clampedX = Math.max(-5, Math.min(5, x));
+            lipschitzPoints[dragging].x = clampedX;
+            render();
+        });
+
+        svg.addEventListener('mouseup', () => {
+            dragging = null;
+        });
+
+        svg.addEventListener('mouseleave', () => {
+            dragging = null;
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
