@@ -1,19 +1,13 @@
-# Function Explorer 📊
-
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://mahesh-sadupalli.github.io/function-explorer/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Pages](https://img.shields.io/badge/deployed%20on-GitHub%20Pages-blue)](https://pages.github.com/)
+# Function Explorer
 
 An interactive, browser-based visualization tool for exploring mathematical functions and their properties in real-time. Built with pure JavaScript and SVG, requiring no external dependencies.
 
-## ✨ Live Demo
+## Live Demo
 
 **[Launch Function Explorer →](https://mahesh-sadupalli.github.io/function-explorer/)**
 
-![Function Explorer Preview](https://via.placeholder.com/800x400/4f46e5/ffffff?text=Function+Explorer+Preview)
-<!-- Replace the above placeholder with an actual screenshot of your app -->
 
-## 🎯 Features
+## Features
 
 ### Current Implementation
 - **📈 Linear Functions** - Explore y = mx + b with interactive controls
